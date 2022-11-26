@@ -125,10 +125,16 @@ class CoolDropdown extends StatefulWidget {
       if (dropdownList[i]['label'] == null) {
         throw '"label" must be initialized.';
       }
+      if (dropdownList[i]['is_selected'] == null) {
+        dropdownList[i]['is_selected'] = false;
+      }
       for (var j = 0; j < dropdownList.length; j++) {
         if (i != j) {
           if (dropdownList[i]['label'] == dropdownList[j]['label']) {
             throw 'label is duplicated. Labels have to be unique.';
+          }
+          if (dropdownList[i]['is_selected'] == dropdownList[j]['is_selected']) {
+            throw 'two items are selected;';
           }
         }
       }
