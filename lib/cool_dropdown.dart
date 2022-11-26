@@ -115,12 +115,12 @@ class CoolDropdown extends StatefulWidget {
   }) {
     // 기본값 셋팅
     if (defaultValue != null) {
-      print('.. $defaultValue');
       this.defaultValue = defaultValue;
     } else {
       this.defaultValue = {};
     }
     // label unique 체크
+    int selectedItems = 0;
     for (var i = 0; i < dropdownList.length; i++) {
       if (dropdownList[i]['label'] == null) {
         throw '"label" must be initialized.';
@@ -133,8 +133,11 @@ class CoolDropdown extends StatefulWidget {
           if (dropdownList[i]['label'] == dropdownList[j]['label']) {
             throw 'label is duplicated. Labels have to be unique.';
           }
-          if (dropdownList[i]['is_selected'] == dropdownList[j]['is_selected']) {
-            throw 'two items are selected;';
+          if (dropdownList[i]['is_selected']) {
+            selectedItems++;
+            if (selectedItems > 1) {
+              throw 'two items are selected. Only one item should be selected';
+            }
           }
         }
       }
@@ -172,8 +175,7 @@ class CoolDropdown extends StatefulWidget {
           borderRadius: BorderRadius.circular(10),
         );
     // text style 셋팅
-    this.selectedItemTS =
-        selectedItemTS ?? TextStyle(color: Color(0xFF6FCC76), fontSize: 20);
+    this.selectedItemTS = selectedItemTS ?? TextStyle(color: Color(0xFF6FCC76), fontSize: 20);
     this.unselectedItemTS = unselectedItemTS != null
         ? unselectedItemTS
         : TextStyle(
@@ -185,16 +187,14 @@ class CoolDropdown extends StatefulWidget {
           fontSize: 20,
           color: Colors.black,
         );
-    this.placeholderTS = placeholderTS ??
-        TextStyle(color: Colors.grey.withOpacity(0.7), fontSize: 20);
+    this.placeholderTS = placeholderTS ?? TextStyle(color: Colors.grey.withOpacity(0.7), fontSize: 20);
     // Icon Container 셋팅
     this.resultIcon = resultIcon ??
         Container(
           width: this.iconSize,
           height: this.iconSize,
           child: CustomPaint(
-            size: Size(
-                this.iconSize * 0.01, (this.iconSize * 0.01 * 1).toDouble()),
+            size: Size(this.iconSize * 0.01, (this.iconSize * 0.01 * 1).toDouble()),
             painter: DropdownArrow(),
           ),
         );
@@ -204,8 +204,7 @@ class CoolDropdown extends StatefulWidget {
   _CoolDropdownState createState() => _CoolDropdownState();
 }
 
-class _CoolDropdownState extends State<CoolDropdown>
-    with TickerProviderStateMixin {
+class _CoolDropdownState extends State<CoolDropdown> with TickerProviderStateMixin {
   GlobalKey<DropdownBodyState> dropdownBodyChild = GlobalKey();
   GlobalKey inputKey = GlobalKey();
   Offset triangleOffset = Offset(0, 0);
@@ -277,9 +276,7 @@ class _CoolDropdownState extends State<CoolDropdown>
         getSelectedItem: (selectedItem) async {
           sizeController = AnimationController(
             vsync: this,
-            duration: au.isAnimation(
-                status: widget.isAnimation,
-                duration: Duration(milliseconds: 150)),
+            duration: au.isAnimation(status: widget.isAnimation, duration: Duration(milliseconds: 150)),
           );
           textWidth = CurvedAnimation(
             parent: sizeController,
@@ -302,13 +299,9 @@ class _CoolDropdownState extends State<CoolDropdown>
   @override
   void initState() {
     rotationController = AnimationController(
-        duration: au.isAnimation(
-            status: widget.isAnimation, duration: Duration(milliseconds: 150)),
-        vsync: this);
+        duration: au.isAnimation(status: widget.isAnimation, duration: Duration(milliseconds: 150)), vsync: this);
     sizeController = AnimationController(
-        vsync: this,
-        duration: au.isAnimation(
-            status: widget.isAnimation, duration: Duration(milliseconds: 150)));
+        vsync: this, duration: au.isAnimation(status: widget.isAnimation, duration: Duration(milliseconds: 150)));
     textWidth = CurvedAnimation(
       parent: sizeController,
       curve: Curves.fastOutSlowIn,
@@ -335,8 +328,8 @@ class _CoolDropdownState extends State<CoolDropdown>
 
   RotationTransition rotationIcon() {
     return RotationTransition(
-        turns: Tween(begin: 0.0, end: widget.resultIconRotationValue).animate(
-            CurvedAnimation(parent: rotationController, curve: Curves.easeIn)),
+        turns: Tween(begin: 0.0, end: widget.resultIconRotationValue)
+            .animate(CurvedAnimation(parent: rotationController, curve: Curves.easeIn)),
         child: widget.resultIcon);
   }
 
@@ -382,12 +375,9 @@ class _CoolDropdownState extends State<CoolDropdown>
                                     Flexible(
                                       child: Container(
                                         child: Text(
-                                          selectedItem['label'] ??
-                                              widget.placeholder,
+                                          selectedItem['label'] ?? widget.placeholder,
                                           overflow: TextOverflow.ellipsis,
-                                          style: selectedItem['label'] != null
-                                              ? widget.resultTS
-                                              : widget.placeholderTS,
+                                          style: selectedItem['label'] != null ? widget.resultTS : widget.placeholderTS,
                                         ),
                                       ),
                                     ),
@@ -395,8 +385,7 @@ class _CoolDropdownState extends State<CoolDropdown>
                                     SizedBox(
                                       width: widget.labelIconGap,
                                     ),
-                                  if (selectedItem['icon'] != null)
-                                    selectedItem['icon'] as Widget,
+                                  if (selectedItem['icon'] != null) selectedItem['icon'] as Widget,
                                 ].isReverse(widget.dropdownItemReverse),
                               ),
                             ),
@@ -404,9 +393,7 @@ class _CoolDropdownState extends State<CoolDropdown>
                           SizedBox(
                             width: widget.resultIconLeftGap,
                           ),
-                          widget.resultIconRotation
-                              ? rotationIcon()
-                              : widget.resultIcon
+                          widget.resultIconRotation ? rotationIcon() : widget.resultIcon
                         ].isReverse(widget.resultReverse),
                       )
                     : rotationIcon(),
@@ -425,58 +412,23 @@ class DropdownArrow extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     Path path_0 = Path();
     path_0.moveTo(size.width * 0.4178592, size.height * 0.7748810);
-    path_0.cubicTo(
-        size.width * 0.4404533,
-        size.height * 0.7974752,
-        size.width * 0.4702912,
-        size.height * 0.8087602,
-        size.width * 0.5001371,
-        size.height * 0.8087602);
-    path_0.cubicTo(
-        size.width * 0.5299831,
-        size.height * 0.8087602,
-        size.width * 0.5598290,
-        size.height * 0.7974752,
-        size.width * 0.5824151,
-        size.height * 0.7748810);
+    path_0.cubicTo(size.width * 0.4404533, size.height * 0.7974752, size.width * 0.4702912, size.height * 0.8087602,
+        size.width * 0.5001371, size.height * 0.8087602);
+    path_0.cubicTo(size.width * 0.5299831, size.height * 0.8087602, size.width * 0.5598290, size.height * 0.7974752,
+        size.width * 0.5824151, size.height * 0.7748810);
     path_0.lineTo(size.width * 0.9639590, size.height * 0.3933371);
-    path_0.cubicTo(
-        size.width * 1.008325,
-        size.height * 0.3489715,
-        size.width * 1.013173,
-        size.height * 0.2755667,
-        size.width * 0.9704122,
-        size.height * 0.2295878);
-    path_0.cubicTo(
-        size.width * 0.9252400,
-        size.height * 0.1803824,
-        size.width * 0.8486085,
-        size.height * 0.1787691,
-        size.width * 0.8018311,
-        size.height * 0.2255546);
+    path_0.cubicTo(size.width * 1.008325, size.height * 0.3489715, size.width * 1.013173, size.height * 0.2755667,
+        size.width * 0.9704122, size.height * 0.2295878);
+    path_0.cubicTo(size.width * 0.9252400, size.height * 0.1803824, size.width * 0.8486085, size.height * 0.1787691,
+        size.width * 0.8018311, size.height * 0.2255546);
     path_0.lineTo(size.width * 0.5566105, size.height * 0.4699685);
-    path_0.cubicTo(
-        size.width * 0.5251593,
-        size.height * 0.5014278,
-        size.width * 0.4743325,
-        size.height * 0.5014278,
-        size.width * 0.4428733,
-        size.height * 0.4699685);
+    path_0.cubicTo(size.width * 0.5251593, size.height * 0.5014278, size.width * 0.4743325, size.height * 0.5014278,
+        size.width * 0.4428733, size.height * 0.4699685);
     path_0.lineTo(size.width * 0.1984593, size.height * 0.2255546);
-    path_0.cubicTo(
-        size.width * 0.1516657,
-        size.height * 0.1787691,
-        size.width * 0.07503428,
-        size.height * 0.1795757,
-        size.width * 0.02987013,
-        size.height * 0.2295878);
-    path_0.cubicTo(
-        size.width * -0.01288215,
-        size.height * 0.2755667,
-        size.width * -0.008848915,
-        size.height * 0.3489715,
-        size.width * 0.03632330,
-        size.height * 0.3933371);
+    path_0.cubicTo(size.width * 0.1516657, size.height * 0.1787691, size.width * 0.07503428, size.height * 0.1795757,
+        size.width * 0.02987013, size.height * 0.2295878);
+    path_0.cubicTo(size.width * -0.01288215, size.height * 0.2755667, size.width * -0.008848915,
+        size.height * 0.3489715, size.width * 0.03632330, size.height * 0.3933371);
     path_0.lineTo(size.width * 0.4178592, size.height * 0.7748810);
     path_0.close();
 
